@@ -1,0 +1,44 @@
+def gitCommit=''
+node{
+    stage('Checkout'){
+        checkout scm
+    }
+
+    stage('Compile and Unit Tests'){
+        sh 'mvn clean install'
+    }
+
+    stage('Build Docker Image'){
+        sh ''
+    }
+
+    stage('Component Test'){
+        dir('component-tests'){
+            sh './run-tests.sh'
+        }
+    }
+
+    stage('Tag Image'){
+        gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+        sh "docker tag gcr.io/angel-nunez/productcatalog-java gcr.io/angel-nunez/productcatalog-java:${gitCommit}"
+    }
+
+    stage('Publish Image'){
+        sh "gcloud docker -- push gcr.io/angel-nunez/productcatalog-java:${gitCommit}"
+    }
+
+    stage('Deploy to Test'){
+        sh "kubectl set image deployment/productcatalog productcatalog=gcr.io/angel-nunez/productcatalog-java:${gitCommit}"
+    }
+
+    stage('Performance Test'){
+        echo "Performance"
+    }
+}
+
+stage('Deploy to Prod'){
+    input 'Are you sure?'
+    node{
+        sh "kubectl --namespace=production set image deployment/productcatalog productcatalog=gcr.io/angel-nunez/productcatalog-java:${gitCommit}"
+    }
+}

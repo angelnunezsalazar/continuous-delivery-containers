@@ -1,0 +1,15 @@
+version: '2.0'
+services:
+  productcatalog:
+      image: gcr.io/angel-nunez/productcatalog-java:latest
+      ports:
+        - 8080:8080
+      links:
+        - mysql
+  mysql:
+      image: mysql:5.7.17
+      environment:
+        MYSQL_ROOT_PASSWORD: password
+        MYSQL_DATABASE: db_default
+      ports:
+        - 3306:3306

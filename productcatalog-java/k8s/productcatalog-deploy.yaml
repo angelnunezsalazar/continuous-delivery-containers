@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: productcatalog
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: productcatalog
+    spec:
+      containers:
+      - name: productcatalog
+        image: gcr.io/angel-nunez/productcatalog-java:688010cd109904ec8acc1c14a56e5d8418db7e96
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
